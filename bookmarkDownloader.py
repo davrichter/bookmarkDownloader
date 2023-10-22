@@ -1,9 +1,10 @@
-import json
-import random
-import string
-import sys
+:import json
 import os
+import re
+import sys
+
 import requests
+import unicodedata
 
 
 def download_bookmarks(bookmarks_path, destination_directory):
@@ -49,14 +50,7 @@ def download_files(data, destination_directory):
                 else:
                     file_extension = ".html"
 
-                try:
-                    f = open(i["title"] + file_extension, "w", encoding="utf8")
-
-                # if there are characters the filesystem can't handle this will happen
-                except OSError:
-                    f = open(destination_directory + ''.join(
-                        random.choice(string.ascii_lowercase) for i in range(6)) + ".html",
-                             "w", encoding="utf8")
+                f = open(destination_directory + "/" + slugify(i["title"]) + file_extension, "w", encoding="utf8")
 
                 f.write(page.content.decode())
 
@@ -71,6 +65,27 @@ def download_files(data, destination_directory):
 
             except UnicodeDecodeError as e:
                 print(e)
+
+
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize("NFKC", value)
+    else:
+        value = (
+            unicodedata.normalize("NFKD", value)
+            .encode("ascii", "ignore")
+            .decode("ascii")
+        )
+    value = re.sub(r"[^\w\s-]", "", value.lower())
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
 if __name__ == "__main__":
