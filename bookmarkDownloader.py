@@ -7,23 +7,9 @@ import requests
 import unicodedata
 
 
-def download_bookmarks(bookmarks_path, destination_directory):
-    f = open(bookmarks_path, encoding="utf8")
-
-    data = json.load(f)
-
-    data = data["children"]
-    for i in data:
-        print(i)
-        print("\n\n----------------\n\n")
-
-    download_files(data, destination_directory)
-
-
 def download_files(data, destination_directory):
     for i in data:
         if i["type"] == "text/x-moz-place-container":
-            directory = ""
             try:
                 directory = i["title"]
                 os.mkdir(destination_directory + "/" + directory)
@@ -43,7 +29,6 @@ def download_files(data, destination_directory):
             try:
                 page = requests.get(i["uri"], timeout=5)
 
-                file_extension = ""
                 if i["uri"].split(".")[-1] == "pdf":
                     file_extension = ".pdf"
                 else:
@@ -53,9 +38,9 @@ def download_files(data, destination_directory):
 
                 print(f"Downloading {filename}...")
 
-                f = open(filename, "w", encoding="utf8")
+                file = open(filename, "w", encoding="utf8")
 
-                f.write(page.content.decode())
+                file.write(page.content.decode())
 
             except requests.exceptions.InvalidSchema as e:
                 print(f"""{i["uri"]} \n {e}""")
@@ -92,4 +77,10 @@ def slugify(value, allow_unicode=False):
 
 
 if __name__ == "__main__":
-    download_bookmarks(sys.argv[1], sys.argv[2])
+    """
+    sys.argv[1] is the path of the exported bookmarks file
+    sys.argv[2] is the path of the destination folder for the files
+    """
+    f = open(sys.argv[1], encoding="utf8")
+
+    download_files(json.load(f)["children"], sys.argv[2])
