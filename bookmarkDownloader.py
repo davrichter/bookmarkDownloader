@@ -40,7 +40,6 @@ def download_files(data, destination_directory):
                 print(e)
 
         elif i["type"] == "text/x-moz-place":
-            print("Hello")
             try:
                 page = requests.get(i["uri"], timeout=5)
 
@@ -50,7 +49,11 @@ def download_files(data, destination_directory):
                 else:
                     file_extension = ".html"
 
-                f = open(destination_directory + "/" + slugify(i["title"]) + file_extension, "w", encoding="utf8")
+                filename = destination_directory + "/" + slugify(i["title"]) + file_extension
+
+                print(f"Downloading {filename}...")
+
+                f = open(filename, "w", encoding="utf8")
 
                 f.write(page.content.decode())
 
