@@ -8,6 +8,12 @@ import unicodedata
 
 
 def download_files(data, destination_directory):
+    """
+    Recursively loop over the data, create the directory structure and download the files.
+    :param data: the bookmarks as an object
+    :param destination_directory: the directory the content will be downloaded to
+    :return:
+    """
     for i in data:
         if i["type"] == "text/x-moz-place-container":
             try:
