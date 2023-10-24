@@ -13,11 +13,14 @@ def download_files(data, destination_directory):
             try:
                 directory = i["title"]
                 os.mkdir(destination_directory + "/" + directory)
+
+            # Can happen if the directory doesn't have a name
             except FileExistsError:
                 directory = i["guid"]
                 os.mkdir(destination_directory + "/" + directory)
 
             print(destination_directory + "/" + directory)
+
             try:
                 download_files(i["children"], destination_directory + "/" + directory)
 
@@ -27,7 +30,9 @@ def download_files(data, destination_directory):
 
         elif i["type"] == "text/x-moz-place":
             try:
-                page = requests.get(i["uri"], timeout=5)
+                page = requests.get(i["uri"], timeout=5, allow_redirects=True)
+
+                print(page.headers.get("content-type"))
 
                 if i["uri"].split(".")[-1] == "pdf":
                     file_extension = ".pdf"
@@ -38,9 +43,8 @@ def download_files(data, destination_directory):
 
                 print(f"Downloading {filename}...")
 
-                file = open(filename, "w", encoding="utf8")
-
-                file.write(page.content.decode())
+                file = open(filename, "wb")
+                file.write(page.content)
 
             except requests.exceptions.InvalidSchema as e:
                 print(f"""{i["uri"]} \n {e}""")
@@ -52,6 +56,9 @@ def download_files(data, destination_directory):
                 print(e)
 
             except UnicodeDecodeError as e:
+                print(e)
+
+            except UnicodeEncodeError as e:
                 print(e)
 
 
